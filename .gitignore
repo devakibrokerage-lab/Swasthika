@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build outputs
+dist/
+build/
+coverage/
+
+# Logs
+logs/
+*.log
+
+# Editor
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+
+# Environment files
+# Backend specific
+Backend/token.json
+
+# Frontend specific
+
+# Data files that shouldn't be tracked
+Backend/data/master-detailed.csv
+data/master-detailed.csv
+frontend/.env.production
+frontend/.env
