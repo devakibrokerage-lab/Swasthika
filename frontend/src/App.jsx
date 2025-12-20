@@ -23,6 +23,7 @@ const BrockerDetailPage = lazy(() => import('./page/User/BrockerDetailPage.jsx')
 const CustomerDetailsPage = lazy(() => import('./page/User/CutomerDetailPage.jsx'));
 const RecycleBin = lazy(() => import('./page/User/RecycleBin.jsx'));
 const AdminRegistrations = lazy(() => import('./page/Admin/AdminRegistrations.jsx'));
+const AdminAccessToken = lazy(() => import('./page/Admin/AdminAccessToken.jsx'));
 
 import { MarketDataProvider } from './contexts/MarketDataContext.jsx';
 import { ThemeProvider } from './contexts/ThemeContext.jsx';
@@ -71,7 +72,7 @@ function App() {
 
                             {/* Admin Routes */}
                             <Route path="/admin/registrations" element={<AdminRegistrations />} />
-
+                            <Route path="/admin/access-token" element={<AdminAccessToken />} />
                             <Route
                                 path="/watchlist"
                                 element={

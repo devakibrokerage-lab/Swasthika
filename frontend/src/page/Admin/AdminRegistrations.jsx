@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { RefreshCw, Trash2, User, Calendar, LogOut } from 'lucide-react';
 import RegistrationDetailBottomWindow from './RegistrationDetailBottomWindow';
 
 const AdminRegistrations = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [registrations, setRegistrations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -60,7 +61,7 @@ const AdminRegistrations = () => {
   // Handle delete
   const handleDelete = async (id, e) => {
     e.stopPropagation(); // Prevent card click
-    
+
     if (!window.confirm('Are you sure you want to delete this registration?')) {
       return;
     }
@@ -115,13 +116,18 @@ const AdminRegistrations = () => {
     setSelectedRegistration(registration);
   };
 
+  const tabs = [
+    { label: 'Registrations', path: '/admin/registrations' },
+    { label: 'Access Token', path: '/admin/access-token' },
+  ];
+
   return (
     <div className="min-h-screen bg-[var(--bg-primary)]">
       {/* Header */}
       <div className="sticky top-0 z-40 bg-[var(--bg-secondary)] border-b border-[var(--border-color)] px-4 py-3">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-3">
           <h1 className="text-xl font-bold text-[var(--text-primary)]">
-            Registration Requests
+            Admin Panel
           </h1>
           <div className="flex items-center gap-2">
             <button
@@ -139,7 +145,24 @@ const AdminRegistrations = () => {
             </button>
           </div>
         </div>
-        <p className="text-sm text-[var(--text-muted)] mt-1">
+
+        {/* Tabs */}
+        <div className="flex gap-2">
+          {tabs.map((tab) => (
+            <button
+              key={tab.path}
+              onClick={() => navigate(tab.path)}
+              className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${location.pathname === tab.path
+                  ? 'bg-indigo-600 text-white'
+                  : 'bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]'
+                }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        <p className="text-sm text-[var(--text-muted)] mt-2">
           {registrations.length} registration{registrations.length !== 1 ? 's' : ''} found
         </p>
       </div>
@@ -197,7 +220,7 @@ const AdminRegistrations = () => {
                     <div className="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center flex-shrink-0">
                       <User className="w-5 h-5 text-indigo-400" />
                     </div>
-                    
+
                     {/* Info */}
                     <div className="min-w-0 flex-1">
                       <h3 className="text-[var(--text-primary)] font-semibold truncate">
