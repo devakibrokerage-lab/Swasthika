@@ -19,9 +19,9 @@ export default defineConfig({
         strictPort: true,
         allowedHosts: ['kite.wolfkrypt.me', 'localhost', '127.0.0.1'],
         proxy: {
-            "/api": "https://api.wolfkrypt.me",
+            "/api": "http://localhost:8080",
             "/socket.io": {
-                target: "https://api.wolfkrypt.me",
+                target: "http://localhost:8080",
                 ws: true
             }
         },
