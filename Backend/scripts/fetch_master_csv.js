@@ -59,11 +59,11 @@ function download(u, outFile) {
 }
 
 // Ensure Kite credentials are present
-const { KITE_API_KEY, KITE_ACCESS_TOKEN } = process.env;
-if (!KITE_API_KEY || !KITE_ACCESS_TOKEN) {
-  console.error("❌ Missing Kite API credentials in .env");
-  process.exit(1);
-}
+// const { KITE_API_KEY, KITE_ACCESS_TOKEN } = process.env;
+// if (!KITE_API_KEY || !KITE_ACCESS_TOKEN) {
+//   console.error("❌ Missing Kite API credentials in .env");
+//   process.exit(1);
+// }
 
 try {
   const out = await download(url, dest);
