@@ -32,6 +32,9 @@ export function createApp() {
     "https://kite.wolfkrypt.me",  // Render frontend (production)
     "https://kite.wolfkrypt.me",  // Render frontend (production)
     "https://swasthika-front.onrender.com", // User's specific frontend
+    "swasthikabrokerage.in",
+    "https://swasthikabrokerage.in",
+    
     process.env.FRONTEND_URL,      // Allowed frontend URL from env
   ].filter(Boolean);
 
