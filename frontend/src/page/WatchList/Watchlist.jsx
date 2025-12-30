@@ -636,10 +636,10 @@ function Watchlist() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 bg-gradient-to-br from-indigo-600 to-violet-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-500/20 border border-[var(--border-color)]">
-              <span className="text-white font-bold text-lg font-sans">D</span>
+              <span className="text-white font-bold text-lg font-sans">S</span>
             </div>
             <div className="flex flex-col">
-              <h3 className="text-lg font-bold text-[var(--text-primary)] tracking-wide leading-none">DEVAKI</h3>
+              <h3 className="text-lg font-bold text-[var(--text-primary)] tracking-wide leading-none">SWASTHIKA</h3>
               <span className="text-[10px] text-[var(--text-secondary)] font-medium tracking-widest uppercase mt-0.5">Terminal</span>
             </div>
           </div>
