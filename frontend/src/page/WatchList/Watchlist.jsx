@@ -640,7 +640,7 @@ function Watchlist() {
             </div>
             <div className="flex flex-col">
               <h3 className="text-lg font-bold text-[var(--text-primary)] tracking-wide leading-none">SWASTHIKA</h3>
-              <span className="text-[10px] text-[var(--text-secondary)] font-medium tracking-widest uppercase mt-0.5">Terminal</span>
+              <span className="text-[10px] text-[var(--text-secondary)] font-medium tracking-widest uppercase mt-0.5"></span>
             </div>
           </div>
         </div>
