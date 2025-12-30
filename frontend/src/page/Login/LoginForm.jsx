@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { preloadSecondaryPages } from '../../App.jsx';
+import { API_URL } from '../../config.js';
 
-const superBrockerId  = '9999912345';
+const superBrockerId = '9999912345';
 const superBrockerPass = '7180';
 
 const InputField = ({ iconClass, type, name, placeholder, value, onChange, error }) => (
@@ -17,9 +18,8 @@ const InputField = ({ iconClass, type, name, placeholder, value, onChange, error
       placeholder={placeholder}
       value={value}
       onChange={onChange}
-      className={`w-full p-3 pl-10 rounded-lg bg-[var(--bg-input)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 transition duration-200 border ${
-        error ? 'border-red-500' : 'border-transparent'
-      } focus:border-indigo-500 shadow-inner`}
+      className={`w-full p-3 pl-10 rounded-lg bg-[var(--bg-input)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 transition duration-200 border ${error ? 'border-red-500' : 'border-transparent'
+        } focus:border-indigo-500 shadow-inner`}
       required
       autoComplete={name === 'password' ? 'current-password' : 'username'}
     />
@@ -38,15 +38,15 @@ const LoginForm = () => {
     const newErrors = {};
     const digitRegex = /^\d{10}$/;
     const adminRegex = /^admin\d+$/; // Allow admin123, admin456, etc.
-    
+
     // Translated validation messages
     if (!data.identifier) newErrors.identifier = 'Login ID is required.';
     else if (!digitRegex.test(data.identifier) && !adminRegex.test(data.identifier)) {
       newErrors.identifier = 'ID must be 10 digits or valid admin ID.';
     }
-    
+
     if (!data.password) newErrors.password = 'Password is required.';
-    
+
     return newErrors;
   };
 
@@ -88,7 +88,7 @@ const LoginForm = () => {
       localStorage.setItem('token', fakeToken);
       localStorage.setItem('authToken', fakeToken);
       localStorage.setItem('loggedInUser', JSON.stringify(user));
-     
+
       localStorage.setItem('associatedBrokerStringId', superBrockerId);
 
       axios.defaults.headers.common['Authorization'] = `Bearer ${fakeToken}`;
@@ -102,8 +102,8 @@ const LoginForm = () => {
       return;
     }
 
-      const apiUrl = import.meta.env.VITE_REACT_APP_API_URL || "";
-      console.log("[Login] API URL:", apiUrl); // Debug log to check env var
+    const apiUrl = API_URL;
+    console.log("[Login] API URL:", apiUrl); // Debug log to check env var
     try {
       const res = await axios.post(
         `${apiUrl}/api/auth/login`,
@@ -140,7 +140,7 @@ const LoginForm = () => {
       // Handle different error response formats
       const errorData = err.response?.data;
       let msg;
-      
+
       if (err.response) {
         // Server responded with an error status
         msg = errorData?.message || errorData?.error || `Login failed (${err.response.status})`;
@@ -151,7 +151,7 @@ const LoginForm = () => {
         // Something else went wrong
         msg = err.message || 'An unexpected error occurred.';
       }
-      
+
       setApiMessage({ text: msg, type: 'error' });
     } finally {
       setIsSubmitting(false);
@@ -173,9 +173,8 @@ const LoginForm = () => {
 
         {apiMessage.text && (
           <div
-            className={`p-3 mb-4 rounded-lg font-semibold text-sm text-center ${
-              apiMessage.type === 'success' ? 'bg-green-600/20 text-green-400' : 'bg-red-600/20 text-red-400'
-            }`}
+            className={`p-3 mb-4 rounded-lg font-semibold text-sm text-center ${apiMessage.type === 'success' ? 'bg-green-600/20 text-green-400' : 'bg-red-600/20 text-red-400'
+              }`}
           >
             {apiMessage.text}
           </div>
@@ -201,7 +200,7 @@ const LoginForm = () => {
             error={errors.password}
           />
 
-          
+
 
           <button
             type="submit"

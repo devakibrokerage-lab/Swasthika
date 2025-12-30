@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useLocation, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import ConfirmDeleteDialog from './ConfirmDeleteDialog';
+import { API_URL } from '../../config.js';
 
 /* ---------- Add Customer Modal (no external icons) ---------- */
 const AddCustomerModal = ({ isVisible, onClose, onCustomerAdded }) => {
@@ -26,7 +27,7 @@ const AddCustomerModal = ({ isVisible, onClose, onCustomerAdded }) => {
     setIsSubmitting(true);
     try {
 
-      const url = import.meta.env.VITE_REACT_APP_API_URL || '';
+      const url = API_URL;
 
       const res = await axios.post(
         `${url}/api/auth/addCustomer`,
@@ -136,7 +137,7 @@ export default function CustomerDetailsPage() {
 
     (async () => {
       try {
-        const url = import.meta.env.VITE_REACT_APP_API_URL || '';
+        const url = API_URL;
 
         const res = await axios.get(
           `${url}/api/auth/getCustomers`,

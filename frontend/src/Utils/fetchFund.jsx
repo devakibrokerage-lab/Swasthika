@@ -1,6 +1,8 @@
+import { API_URL } from '../config.js';
+
 export const getFundsData = async () => {
     try {
-        const apiBase = import.meta.env.VITE_REACT_APP_API_URL || "";
+        const apiBase = API_URL;
         const token = localStorage.getItem("token");
         const activeContextString = localStorage.getItem('activeContext');
 
