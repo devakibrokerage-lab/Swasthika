@@ -26,7 +26,7 @@ const AddCustomerModal = ({ isVisible, onClose, onCustomerAdded }) => {
     setIsSubmitting(true);
     try {
 
-      const url = import.meta.env.VITE_REACT_APP_API_URL || 'http://localhost:8080';
+      const url = import.meta.env.VITE_REACT_APP_API_URL || '';
 
       const res = await axios.post(
         `${url}/api/auth/addCustomer`,
@@ -136,7 +136,7 @@ export default function CustomerDetailsPage() {
 
     (async () => {
       try {
-        const url = import.meta.env.VITE_REACT_APP_API_URL || 'http://localhost:8080';
+        const url = import.meta.env.VITE_REACT_APP_API_URL || '';
 
         const res = await axios.get(
           `${url}/api/auth/getCustomers`,
@@ -156,27 +156,27 @@ export default function CustomerDetailsPage() {
   }, []);
 
   // View → open watchlist with brokerId(from localStorage) + customerId
- const openWatchlist = (customerId) => {
+  const openWatchlist = (customerId) => {
     const brokerId10 = loggedInUser?.id || displayBrokerId;
-    
+
     if (!brokerId10) return alert('Broker ID missing.');
     if (!customerId) return alert('Customer ID missing.');
 
     // ✅ STEP 1: Find the specific customer object from the array
     const selectedCustomer = customers.find((c) => c.id === customerId);
-    
+
     // ✅ STEP 2: Get the name safely
     const customerName = selectedCustomer ? selectedCustomer.name : "Unknown Customer";
 
     console.log('Selected Customer Name:', customerName);
 
     localStorage.setItem('activeContext', JSON.stringify({ brokerId: brokerId10, customerId }));
-    
+
     // ✅ STEP 3: Save the name correctly
-    localStorage.setItem('customerName', customerName); 
+    localStorage.setItem('customerName', customerName);
 
     navigate(`/watchlist?brokerId=${encodeURIComponent(brokerId10)}&customerId=${encodeURIComponent(customerId)}`);
-};
+  };
 
   if (loading) return <div className="p-6 text-[var(--text-secondary)]">Loading customers…</div>;
 
@@ -205,7 +205,7 @@ export default function CustomerDetailsPage() {
                   <span className="text-[var(--text-secondary)]">ID:</span>{' '}
                   <span className="text-[#8aa2ff]">{c.id}</span>
                 </div>
-               
+
                 <div className="text-sm font-semibold">
                   <span className="text-[var(--text-secondary)]">password:</span>{' '}
                   <span className="text-[#8aa2ff]">{c.password}</span>

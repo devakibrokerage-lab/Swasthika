@@ -28,9 +28,9 @@ const AddBrokerModal = ({ isVisible, onClose, onBrokerAdded, isSetupMode = false
       return;
     }
     setIsSubmitting(true);
-    
+
     // URL definition with fallback
-    const url = import.meta.env.VITE_REACT_APP_API_URL || 'http://localhost:8080';
+    const url = import.meta.env.VITE_REACT_APP_API_URL || '';
 
     try {
       const response = await axios.post(
@@ -44,19 +44,19 @@ const AddBrokerModal = ({ isVisible, onClose, onBrokerAdded, isSetupMode = false
           name: formData.name,
           password: formData.password
         };
-        
+
         // Pass data to parent to update UI immediately
         onBrokerAdded(newBroker);
-        
+
         setMessage(`✅ Success! Broker added. Login ID: ${newBroker.id}.`);
         setFormData({ name: '', password: '' });
-        
+
         // Close modal automatically after success if not setup mode
         if (!isSetupMode) {
-            setTimeout(() => {
-                onClose();
-                setMessage('');
-            }, 1500);
+          setTimeout(() => {
+            onClose();
+            setMessage('');
+          }, 1500);
         }
       } else {
         setMessage(response.data.message || '❌ Failed to add broker.');
@@ -151,9 +151,9 @@ const BrokerDetailsPage = () => {
   const handleNewBrokerAdded = (newBrokerData) => {
     console.log("Adding new broker to UI:", newBrokerData);
     setBrokers((prev) => {
-        // Prevent duplicate addition if API sends weird data
-        if(prev.find(b => b.id === newBrokerData.id)) return prev;
-        return [newBrokerData, ...prev];
+      // Prevent duplicate addition if API sends weird data
+      if (prev.find(b => b.id === newBrokerData.id)) return prev;
+      return [newBrokerData, ...prev];
     });
     // Clear error immediately so the list shows up
     setError(null);
@@ -162,13 +162,13 @@ const BrokerDetailsPage = () => {
   const fetchBrokers = async () => {
     setLoading(true);
     // URL definition with fallback
-    const url = import.meta.env.VITE_REACT_APP_API_URL || 'http://localhost:8080';
-    
+    const url = import.meta.env.VITE_REACT_APP_API_URL || '';
+
     try {
       console.log("Fetching brokers from:", `${url}/api/auth/get-all-brocker`);
       // NOTE: Check spelling in your API. 'brocker' vs 'broker'
       const res = await axios.get(`${url}/api/auth/get-all-brocker`);
-      
+
       console.log("Fetch response:", res.data);
 
       if (res.data.success) {
@@ -178,7 +178,7 @@ const BrokerDetailsPage = () => {
         setError(null);
       } else {
         // Even if success is false, if we have empty list, it's not an error state unless we want it to be
-        setBrokers([]); 
+        setBrokers([]);
       }
     } catch (err) {
       console.error('Fetch error:', err);
@@ -228,7 +228,7 @@ const BrokerDetailsPage = () => {
         <h1 className="text-4xl font-extrabold mb-4 text-indigo-400">System Setup Required</h1>
         <p className="text-xl mb-8 text-[var(--text-secondary)]">No brokers found in the database. Please add the first Broker.</p>
         {/* Pass the handler correctly here */}
-        <AddBrokerModal isVisible={true} onClose={() => {}} onBrokerAdded={handleNewBrokerAdded} isSetupMode={true} />
+        <AddBrokerModal isVisible={true} onClose={() => { }} onBrokerAdded={handleNewBrokerAdded} isSetupMode={true} />
       </div>
     );
   }
@@ -236,12 +236,12 @@ const BrokerDetailsPage = () => {
   // If there is an error but we have data (rare), show data. 
   // If error and no data, show error.
   if (error && brokers.length === 0) {
-      return (
-        <div className="min-h-screen bg-[var(--bg-primary)] p-8 flex flex-col items-center justify-center">
-            <div className="text-center p-12 text-red-500 font-bold text-xl">{error}</div>
-            <button onClick={fetchBrokers} className="mt-4 bg-indigo-600 text-white px-4 py-2 rounded">Retry Fetch</button>
-        </div>
-      );
+    return (
+      <div className="min-h-screen bg-[var(--bg-primary)] p-8 flex flex-col items-center justify-center">
+        <div className="text-center p-12 text-red-500 font-bold text-xl">{error}</div>
+        <button onClick={fetchBrokers} className="mt-4 bg-indigo-600 text-white px-4 py-2 rounded">Retry Fetch</button>
+      </div>
+    );
   }
 
   return (
@@ -265,12 +265,12 @@ const BrokerDetailsPage = () => {
           <div key={broker.id} className="bg-[var(--bg-card)] rounded-xl p-4 border border-[var(--border-color)] shadow-md hover:bg-[var(--bg-hover)] transition">
             <div className="flex flex-wrap justify-between items-center">
               <div className="flex flex-col md:flex-row gap-2 md:gap-8">
-                  <p className="text-[var(--text-primary)] font-medium text-base"><span className="text-indigo-400 font-semibold">ID:</span> {broker.id}</p>
-                  <p className="text-[var(--text-secondary)] font-medium text-base">Name: {broker.name}</p>
-                  {/* Password usually shouldn't be shown, but keeping per your request */}
-                  {broker.password && (
-                     <p className="text-[var(--text-secondary)] font-medium text-base"><span className="text-indigo-400 font-semibold">Pass:</span> {broker.password}</p>
-                  )}
+                <p className="text-[var(--text-primary)] font-medium text-base"><span className="text-indigo-400 font-semibold">ID:</span> {broker.id}</p>
+                <p className="text-[var(--text-secondary)] font-medium text-base">Name: {broker.name}</p>
+                {/* Password usually shouldn't be shown, but keeping per your request */}
+                {broker.password && (
+                  <p className="text-[var(--text-secondary)] font-medium text-base"><span className="text-indigo-400 font-semibold">Pass:</span> {broker.password}</p>
+                )}
               </div>
             </div>
             <div className="mt-3 flex space-x-2">
@@ -286,11 +286,11 @@ const BrokerDetailsPage = () => {
       </div>
 
       {/* Modal for "Add New Broker" button in header */}
-      <AddBrokerModal 
-        isVisible={showAddModal} 
-        onClose={() => setShowAddModal(false)} 
-        onBrokerAdded={handleNewBrokerAdded} 
-        isSetupMode={false} 
+      <AddBrokerModal
+        isVisible={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onBrokerAdded={handleNewBrokerAdded}
+        isSetupMode={false}
       />
 
       {/* Mobile FAB */}

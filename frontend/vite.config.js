@@ -72,10 +72,15 @@ export default defineConfig({
         strictPort: true,
         allowedHosts: ['localhost', '127.0.0.1'],
         proxy: {
-            "/api": "https://devaki-backend-rnj5.onrender.com",
+            "/api": {
+                target: "https://devaki-backend-rnj5.onrender.com",
+                changeOrigin: true,
+                secure: true,
+            },
             "/socket.io": {
                 target: "https://devaki-backend-rnj5.onrender.com",
-                ws: true
+                changeOrigin: true,
+                ws: true,
             }
         },
     },

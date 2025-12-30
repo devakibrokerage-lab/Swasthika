@@ -1,6 +1,6 @@
 export const getFundsData = async () => {
     try {
-        const apiBase = import.meta.env.VITE_REACT_APP_API_URL || "http://localhost:8080";
+        const apiBase = import.meta.env.VITE_REACT_APP_API_URL || "";
         const token = localStorage.getItem("token");
         const activeContextString = localStorage.getItem('activeContext');
 
@@ -12,7 +12,7 @@ export const getFundsData = async () => {
 
         // *** FIX: Ensure NO SPACES in query params ***
         const endpoint = `${apiBase}/api/funds/getFunds?broker_id_str=${brokerId}&customer_id_str=${customerId}`;
-        
+
         const response = await fetch(endpoint, {
             method: "GET",
             headers: {
