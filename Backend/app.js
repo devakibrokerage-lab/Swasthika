@@ -30,7 +30,8 @@ export function createApp() {
     "http://localhost:5173",                   // Local Vite frontend
     "http://127.0.0.1:5173",                   // Local IP
     "https://kite.wolfkrypt.me",  // Render frontend (production)
-  ];
+    process.env.FRONTEND_URL,      // Allowed frontend URL from env
+  ].filter(Boolean);
 
   // If you have extra origins in your config file, we add them too
   const configOrigins = (config.origin || "")
