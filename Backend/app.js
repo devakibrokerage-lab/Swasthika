@@ -34,7 +34,8 @@ export function createApp() {
     "https://swasthika-front.onrender.com", // User's specific frontend
     "swasthikabrokerage.in",
     "https://swasthikabrokerage.in",
-
+    "devakibrokers.in",
+    "https://devakibrokers.in",
     "https://devaki.onrender.com",
     
     process.env.FRONTEND_URL,      // Allowed frontend URL from env

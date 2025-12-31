@@ -27,5 +27,3 @@ Backend/token.json
 # Data files that shouldn't be tracked
 Backend/data/master-detailed.csv
 data/master-detailed.csv
-frontend/.env.production
-frontend/.env
