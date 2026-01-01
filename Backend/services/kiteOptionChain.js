@@ -193,10 +193,16 @@ export async function getExpiryList(underlyingName, segment = 'NFO-OPT') {
     try {
         console.log(`[KiteOptionChain] Getting expiries for: ${underlyingName} (${segment})`);
 
+        // Use start of today (midnight UTC) to include same-day expiries
+        // Expiries are stored as midnight UTC, so comparing with current time
+        // would exclude today's expiry after midnight has passed
+        const startOfToday = new Date();
+        startOfToday.setUTCHours(0, 0, 0, 0);
+
         let expiries = await Instrument.distinct('expiry', {
             name: underlyingName,
             segment: segment,
-            expiry: { $gte: new Date() }
+            expiry: { $gte: startOfToday }
         });
 
         // Fallback: For equity options (NFO-OPT/BFO-OPT), if no results found,
@@ -216,11 +222,11 @@ export async function getExpiryList(underlyingName, segment = 'NFO-OPT') {
                 if (equityInstrument && equityInstrument.tradingsymbol) {
                     console.log(`[KiteOptionChain] Found equity tradingsymbol: ${equityInstrument.tradingsymbol}, retrying...`);
                     
-                    // Retry with tradingsymbol
+                    // Retry with tradingsymbol (use same startOfToday for consistency)
                     expiries = await Instrument.distinct('expiry', {
                         name: equityInstrument.tradingsymbol,
                         segment: segment,
-                        expiry: { $gte: new Date() }
+                        expiry: { $gte: startOfToday }
                     });
                 }
             }

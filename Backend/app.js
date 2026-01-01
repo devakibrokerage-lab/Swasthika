@@ -31,9 +31,13 @@ export function createApp() {
     "http://127.0.0.1:5173",                   // Local IP
     "https://kite.wolfkrypt.me",  // Render frontend (production)
     "https://kite.wolfkrypt.me",  // Render frontend (production)
+
+    
     "https://swasthika-front.onrender.com", // User's specific frontend
     "swasthikabrokerage.in",
     "https://swasthikabrokerage.in",
+
+
     "devakibrokers.in",
     "https://devakibrokers.in",
     "https://devaki.onrender.com",

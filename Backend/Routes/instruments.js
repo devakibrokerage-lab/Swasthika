@@ -176,7 +176,12 @@ router.get("/search", async (req, res) => {
         const { keyword, segmentFilter, typeFilter } = parseSmartQuery(q);
         // Use the processed keyword directly as it already handles spaced/unspaced variations
         const regex = new RegExp(keyword, "i");
-        const currentDate = new Date();
+        
+        // Use start of today (midnight UTC) to include same-day expiries
+        // Expiries are stored as midnight UTC, so comparing with current time
+        // would exclude today's expiry after midnight has passed
+        const startOfToday = new Date();
+        startOfToday.setUTCHours(0, 0, 0, 0);
 
         // Cache check - using original query for more accurate caching
         const cacheKey = `search:${q.toLowerCase()}:${JSON.stringify(segmentFilter)}:${JSON.stringify(typeFilter)}`;
@@ -232,7 +237,7 @@ router.get("/search", async (req, res) => {
                     futures: [
                         { $match: {
                             instrument_type: "FUT",
-                            expiry: { $gte: currentDate }
+                            expiry: { $gte: startOfToday }
                         } },
                         // Prioritize nearest expiry
                         { $addFields: { expiryScore: { $subtract: [0, { $toLong: "$expiry" }] } } },
@@ -242,7 +247,7 @@ router.get("/search", async (req, res) => {
                     options: [
                         { $match: {
                             instrument_type: { $in: ["CE", "PE"] },
-                            expiry: { $gte: currentDate }
+                            expiry: { $gte: startOfToday }
                         } },
                         { $addFields: { expiryScore: { $subtract: [0, { $toLong: "$expiry" }] } } },
                         { $sort: { expiryScore: -1 } },
@@ -303,14 +308,16 @@ router.get("/watchlist", async (req, res) => {
             "SBIN", "ICICIBANK", "INFY", "TCS", "ADANIENT"
         ];
 
-        const currentDate = new Date();
+        // Use start of today (midnight UTC) to include same-day expiries
+        const startOfToday = new Date();
+        startOfToday.setUTCHours(0, 0, 0, 0);
         const results = [];
 
         for (const keyword of popularKeywords.slice(0, 5)) {
             const futDoc = await Instrument.findOne({
                 name: { $regex: new RegExp(`^${keyword}$`, 'i') },
                 instrument_type: "FUT",
-                expiry: { $gte: currentDate }
+                expiry: { $gte: startOfToday }
             })
                 .sort({ expiry: 1 })
                 .lean();
