@@ -41,6 +41,8 @@ export function createApp() {
     "devakibrokers.in",
     "https://devakibrokers.in",
     "https://devaki.onrender.com",
+
+    "https://dhanlaxmi-p68i.onrender.com",
     
     process.env.FRONTEND_URL,      // Allowed frontend URL from env
   ].filter(Boolean);
