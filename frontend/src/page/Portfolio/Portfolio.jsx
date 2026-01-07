@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { 
-  BarChart, Zap, Filter, PieChart, X 
+import {
+  BarChart, Zap, Filter, PieChart, X
 } from "lucide-react";
+import { calculateExitBrokerageAndPnL } from "../../Utils/calculateBrokerage.jsx";
 
 // --- Helpers ---
 const money = (n) => `₹${Number(n ?? 0).toFixed(2)}`;
@@ -20,12 +21,12 @@ function endOfDay(d) {
 }
 
 const getOrderValues = (order) => {
-    const qty = parseFloat(order.quantity) || 0;
-    let entryPrice = parseFloat(order.average_price);
-    if (!entryPrice) entryPrice = parseFloat(order.price) || 0;
-    let exitPrice = parseFloat(order.closed_ltp);
-    if (!exitPrice) exitPrice = parseFloat(order.ltp) || 0;
-    return { qty, entryPrice, exitPrice };
+  const qty = parseFloat(order.quantity) || 0;
+  let entryPrice = parseFloat(order.average_price);
+  if (!entryPrice) entryPrice = parseFloat(order.price) || 0;
+  let exitPrice = parseFloat(order.closed_ltp);
+  if (!exitPrice) exitPrice = parseFloat(order.ltp) || 0;
+  return { qty, entryPrice, exitPrice };
 };
 
 // ==========================================
@@ -116,15 +117,15 @@ function ClosedOrderFilter({ closedOrders = [], onFilter }) {
 
   // Run initial filter on mount (defaults to showing all or today based on preference, here defaulting to ALL via effect in parent)
   // But strictly per component logic:
-  
+
   const showNumberInput = ["day", "month", "year"].includes(range);
 
   return (
     <div className="w-full bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl p-4 space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
       <div className="flex justify-between items-center mb-1">
-         <h3 className="text-sm font-semibold text-[var(--text-primary)]">Filter Orders</h3>
+        <h3 className="text-sm font-semibold text-[var(--text-primary)]">Filter Orders</h3>
       </div>
-      
+
       <div>
         <label className="text-xs text-[var(--text-secondary)]">Time Range</label>
         <select
@@ -173,229 +174,234 @@ function ClosedOrderFilter({ closedOrders = [], onFilter }) {
 // 2. PORTFOLIO ITEM CARD
 // ==========================================
 const PortfolioItem = ({ data, onClick }) => {
-    const tradingsymbol = data?.meta?.selectedStock?.tradingSymbol ?? data?.symbol ?? "—";
-    const { qty, entryPrice, exitPrice } = getOrderValues(data);
-    const sideUpper = String(data.side ?? "").toUpperCase();
+  const tradingsymbol = data?.meta?.selectedStock?.tradingSymbol ?? data?.symbol ?? "—";
+  const { qty, entryPrice, exitPrice } = getOrderValues(data);
+  const sideUpper = String(data.side ?? "").toUpperCase();
 
-    const diff = sideUpper === "BUY" ? (exitPrice - entryPrice) : (entryPrice - exitPrice);
-    const pnl = diff * qty;
-    const pct = entryPrice ? (diff / entryPrice) * 100 : 0;
-    const pnlColor = signColor(pnl);
+  const { netPnl, pct } = calculateExitBrokerageAndPnL({
+    side: sideUpper,
+    avgPrice: entryPrice,
+    exitPrice,
+    qty
+  });
+  const pnlColor = signColor(netPnl);
 
-    return (
-        <div 
-            onClick={() => onClick(data)}
-            className="relative bg-[var(--bg-secondary)] p-4 rounded-xl shadow-md border border-[var(--border-color)] hover:bg-[var(--bg-hover)] transition mb-3 cursor-pointer group"
-        >
-            <span className="absolute left-0 top-3 bottom-3 w-1 rounded-r-full bg-fuchsia-500 transition-all group-hover:bg-fuchsia-400" />
-            
-            <div className="flex justify-between items-center mb-2">
-                <p className="text-base md:text-lg font-bold text-[var(--text-primary)] tracking-wide">{tradingsymbol}</p>
-                <p className={`text-sm md:text-base font-semibold ${pnlColor}`}>
-                    {signSym(pnl)}{money(pnl)} 
-                    <span className="text-[10px] ml-1 opacity-80">({signSym(pct)}{pct.toFixed(2)}%)</span>
-                </p>
-            </div>
+  return (
+    <div
+      onClick={() => onClick(data)}
+      className="relative bg-[var(--bg-secondary)] p-4 rounded-xl shadow-md border border-[var(--border-color)] hover:bg-[var(--bg-hover)] transition mb-3 cursor-pointer group"
+    >
+      <span className="absolute left-0 top-3 bottom-3 w-1 rounded-r-full bg-fuchsia-500 transition-all group-hover:bg-fuchsia-400" />
 
-            <div className="flex justify-between text-xs md:text-sm text-[var(--text-secondary)]">
-                <div className="space-y-1">
-                    <p>Qty: <span className="text-[var(--text-primary)] font-medium">{qty}</span></p>
-                    <p>Entry: <span className="text-[var(--text-primary)] font-medium">{money(entryPrice)}</span></p>
-                </div>
-                <div className="space-y-1 text-right">
-                    <p>Exit: <span className="text-[var(--text-primary)] font-semibold">{money(exitPrice)}</span></p>
-                    <p>Type: <span className={`font-semibold ${sideUpper === 'BUY' ? 'text-blue-300' : 'text-orange-300'}`}>{sideUpper}</span></p>
-                </div>
-            </div>
-            
-            <div className="mt-2 flex items-center text-fuchsia-300 group-hover:text-fuchsia-200 text-xs font-medium transition-colors">
-                <BarChart className="w-3 h-3 mr-1" /> View Details
-            </div>
+      <div className="flex justify-between items-center mb-2">
+        <p className="text-base md:text-lg font-bold text-[var(--text-primary)] tracking-wide">{tradingsymbol}</p>
+        <p className={`text-sm md:text-base font-semibold ${pnlColor}`}>
+          {signSym(netPnl)}{money(netPnl)}
+          <span className="text-[10px] ml-1 opacity-80">({signSym(pct)}{pct.toFixed(2)}%)</span>
+        </p>
+      </div>
+
+      <div className="flex justify-between text-xs md:text-sm text-[var(--text-secondary)]">
+        <div className="space-y-1">
+          <p>Qty: <span className="text-[var(--text-primary)] font-medium">{qty}</span></p>
+          <p>Entry: <span className="text-[var(--text-primary)] font-medium">{money(entryPrice)}</span></p>
         </div>
-    );
+        <div className="space-y-1 text-right">
+          <p>Exit: <span className="text-[var(--text-primary)] font-semibold">{money(exitPrice)}</span></p>
+          <p>Type: <span className={`font-semibold ${sideUpper === 'BUY' ? 'text-blue-300' : 'text-orange-300'}`}>{sideUpper}</span></p>
+        </div>
+      </div>
+
+      <div className="mt-2 flex items-center text-fuchsia-300 group-hover:text-fuchsia-200 text-xs font-medium transition-colors">
+        <BarChart className="w-3 h-3 mr-1" /> View Details
+      </div>
+    </div>
+  );
 };
 
 // ==========================================
 // 3. MAIN PORTFOLIO COMPONENT
 // ==========================================
 export default function Portfolio() {
-    const [allOrders, setAllOrders] = useState([]); // Raw data from API
-    const [filteredOrders, setFilteredOrders] = useState([]); // Data shown in list
-    const [summary, setSummary] = useState({ invested: 0, current: 0, totalPnl: 0 });
-    const [loader, setLoader] = useState(true);
-    const [selectedOrder, setSelectedOrder] = useState(null);
-    
-    // UI State for Switcher
-    const [showFilter, setShowFilter] = useState(false);
+  const [allOrders, setAllOrders] = useState([]); // Raw data from API
+  const [filteredOrders, setFilteredOrders] = useState([]); // Data shown in list
+  const [summary, setSummary] = useState({ invested: 0, current: 0, totalPnl: 0 });
+  const [loader, setLoader] = useState(true);
+  const [selectedOrder, setSelectedOrder] = useState(null);
 
-    // API Params
-    const activeContext = JSON.parse(localStorage.getItem('activeContext') || '{}');
-    const { brokerId, customerId } = activeContext;
-    const token = localStorage.getItem("token");
+  // UI State for Switcher
+  const [showFilter, setShowFilter] = useState(false);
 
-    // Fetch Data
-    const fetchClosedOrders = async () => {
-        if (!brokerId || !customerId) { setLoader(false); return; }
-        setLoader(true);
-        try {
-            const baseUrl = import.meta.env.VITE_REACT_APP_API_URL || "";
-            const res = await fetch(`${baseUrl}/api/orders/getOrderInstrument?broker_id_str=${brokerId}&customer_id_str=${customerId}&orderStatus=CLOSED`, {
-                headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-            });
+  // API Params
+  const activeContext = JSON.parse(localStorage.getItem('activeContext') || '{}');
+  const { brokerId, customerId } = activeContext;
+  const token = localStorage.getItem("token");
 
-            if (!res.ok) throw new Error("Failed");
-            const data = await res.json();
-            const orders = Array.isArray(data?.ordersInstrument) ? data.ordersInstrument : [];
-            const sortedOrders = orders.sort((a, b) => new Date(b.closed_at) - new Date(a.closed_at));
-            
-            setAllOrders(sortedOrders);
-            setFilteredOrders(sortedOrders); // Initially show all
-            calculateSummary(sortedOrders);
-        } catch (err) {
-            console.error(err);
-        } finally {
-            setLoader(false);
-        }
-    };
+  // Fetch Data
+  const fetchClosedOrders = async () => {
+    if (!brokerId || !customerId) { setLoader(false); return; }
+    setLoader(true);
+    try {
+      const baseUrl = import.meta.env.VITE_REACT_APP_API_URL || "";
+      const res = await fetch(`${baseUrl}/api/orders/getOrderInstrument?broker_id_str=${brokerId}&customer_id_str=${customerId}&orderStatus=CLOSED`, {
+        headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      });
 
-    // Recalculate summary based on visible orders
-    const calculateSummary = (orders) => {
-        const acc = orders.reduce((a, order) => {
-            const { qty, entryPrice, exitPrice } = getOrderValues(order);
-            const side = String(order.side ?? "").toUpperCase();
-            
-            const investAmount = entryPrice * qty;
-            const realizedAmount = exitPrice * qty;
-            const diff = side === 'BUY' ? (exitPrice - entryPrice) : (entryPrice - exitPrice);
-            const pnl = diff * qty;
+      if (!res.ok) throw new Error("Failed");
+      const data = await res.json();
+      const orders = Array.isArray(data?.ordersInstrument) ? data.ordersInstrument : [];
+      const sortedOrders = orders.sort((a, b) => new Date(b.closed_at) - new Date(a.closed_at));
 
-            a.invested += investAmount;
-            a.current += realizedAmount;
-            a.totalPnl += pnl;
-            return a;
-        }, { invested: 0, current: 0, totalPnl: 0 });
+      setAllOrders(sortedOrders);
+      setFilteredOrders(sortedOrders); // Initially show all
+      calculateSummary(sortedOrders);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoader(false);
+    }
+  };
 
-        setSummary(acc);
-    };
+  // Recalculate summary based on visible orders
+  const calculateSummary = (orders) => {
+    const acc = orders.reduce((a, order) => {
+      const { qty, entryPrice, exitPrice } = getOrderValues(order);
+      const side = String(order.side ?? "").toUpperCase();
 
-    const handleFilterResult = (results) => {
-        setFilteredOrders(results);
-        calculateSummary(results);
-        // Optional: Auto close filter on apply? 
-        // setShowFilter(false); 
-    };
+      const { entryValue, exitValue, netPnl } = calculateExitBrokerageAndPnL({
+        side,
+        avgPrice: entryPrice,
+        exitPrice,
+        qty
+      });
 
-    useEffect(() => {
-        fetchClosedOrders();
-        const handler = () => fetchClosedOrders();
-        window.addEventListener('orders:changed', handler);
-        return () => window.removeEventListener('orders:changed', handler);
-    }, [brokerId, customerId]);
+      a.invested += entryValue;
+      a.current += exitValue;
+      a.totalPnl += netPnl;
+      return a;
+    }, { invested: 0, current: 0, totalPnl: 0 });
 
-    const totalColor = signColor(summary.totalPnl);
+    setSummary(acc);
+  };
 
-    return (
-        <div className="flex flex-col min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] overflow-hidden">
-            
-            {/* Header with Switcher */}
-            <div className="flex justify-between items-center px-4 pt-4 pb-2">
-                <h2 className="text-[26px] font-semibold leading-none">Portfolio</h2>
-                
-                {/* Switcher Button */}
-                <button 
-                    onClick={() => setShowFilter(!showFilter)}
-                    className={`
+  const handleFilterResult = (results) => {
+    setFilteredOrders(results);
+    calculateSummary(results);
+    // Optional: Auto close filter on apply? 
+    // setShowFilter(false); 
+  };
+
+  useEffect(() => {
+    fetchClosedOrders();
+    const handler = () => fetchClosedOrders();
+    window.addEventListener('orders:changed', handler);
+    return () => window.removeEventListener('orders:changed', handler);
+  }, [brokerId, customerId]);
+
+  const totalColor = signColor(summary.totalPnl);
+
+  return (
+    <div className="flex flex-col min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] overflow-hidden">
+
+      {/* Header with Switcher */}
+      <div className="flex justify-between items-center px-4 pt-4 pb-2">
+        <h2 className="text-[26px] font-semibold leading-none">Portfolio</h2>
+
+        {/* Switcher Button */}
+        <button
+          onClick={() => setShowFilter(!showFilter)}
+          className={`
                         flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all duration-300
-                        ${showFilter 
-                            ? "bg-indigo-500/10 text-indigo-400 border-indigo-500/50" 
-                            : "bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-[var(--border-color)] hover:bg-[var(--bg-hover)]"
-                        }
+                        ${showFilter
+              ? "bg-indigo-500/10 text-indigo-400 border-indigo-500/50"
+              : "bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-[var(--border-color)] hover:bg-[var(--bg-hover)]"
+            }
                     `}
-                >
-                    {showFilter ? (
-                        <>
-                            <PieChart className="w-3.5 h-3.5" />
-                            Show Summary
-                        </>
-                    ) : (
-                        <>
-                            <Filter className="w-3.5 h-3.5" />
-                            Filter
-                        </>
-                    )}
-                </button>
-            </div>
+        >
+          {showFilter ? (
+            <>
+              <PieChart className="w-3.5 h-3.5" />
+              Show Summary
+            </>
+          ) : (
+            <>
+              <Filter className="w-3.5 h-3.5" />
+              Filter
+            </>
+          )}
+        </button>
+      </div>
 
-            <div className="flex-1 overflow-y-auto px-4 pb-24 mt-2">
-                
-                {/* SWAPPABLE AREA: Summary vs Filter */}
-                <div className="mb-6 relative">
-                    {showFilter ? (
-                         <ClosedOrderFilter 
-                            closedOrders={allOrders} 
-                            onFilter={handleFilterResult} 
-                        />
-                    ) : (
-                        <div className="bg-[var(--bg-secondary)] p-5 rounded-xl shadow border border-[var(--border-color)] animate-in fade-in zoom-in-95 duration-300">
-                             {/* Portfolio Summary Card */}
-                            <div className="flex justify-between items-start mb-4">
-                                <div>
-                                    <p className="text-[var(--text-secondary)] text-sm">Total Invested</p>
-                                    <p className="text-xl font-bold">{money(summary.invested)}</p>
-                                </div>
-                                <div className="text-right">
-                                    <p className="text-[var(--text-secondary)] text-sm">Realized Value</p>
-                                    <p className="text-xl font-bold">{money(summary.current)}</p>
-                                </div>
-                            </div>
+      <div className="flex-1 overflow-y-auto px-4 pb-24 mt-2">
 
-                            <div className="flex justify-between items-center pt-3 border-t border-[var(--border-color)]">
-                                <p className="text-[var(--text-secondary)] text-sm">Total Realized P&L</p>
-                                <p className={`text-lg font-bold ${totalColor}`}>
-                                    {signSym(summary.totalPnl)}
-                                    {Number(summary.totalPnl).toFixed(2)}
-                                </p>
-                            </div>
-                        </div>
-                    )}
+        {/* SWAPPABLE AREA: Summary vs Filter */}
+        <div className="mb-6 relative">
+          {showFilter ? (
+            <ClosedOrderFilter
+              closedOrders={allOrders}
+              onFilter={handleFilterResult}
+            />
+          ) : (
+            <div className="bg-[var(--bg-secondary)] p-5 rounded-xl shadow border border-[var(--border-color)] animate-in fade-in zoom-in-95 duration-300">
+              {/* Portfolio Summary Card */}
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <p className="text-[var(--text-secondary)] text-sm">Total Invested</p>
+                  <p className="text-xl font-bold">{money(summary.invested)}</p>
                 </div>
+                <div className="text-right">
+                  <p className="text-[var(--text-secondary)] text-sm">Realized Value</p>
+                  <p className="text-xl font-bold">{money(summary.current)}</p>
+                </div>
+              </div>
 
-                {/* List Header */}
-                <h3 className="text-base font-semibold mb-3 flex items-center justify-between">
-                    <span>Closed Positions ({filteredOrders.length})</span>
-                    {/* Show indicator if filtered */}
-                    {allOrders.length !== filteredOrders.length && (
-                        <span className="text-[10px] bg-indigo-500/20 text-indigo-400 px-2 py-0.5 rounded-full">Filtered</span>
-                    )}
-                </h3>
-
-                {/* The List */}
-                {loader && <div className="text-center text-[var(--text-secondary)] text-sm mt-10">Loading positions...</div>}
-                
-                {!loader && filteredOrders.map((order, idx) => (
-                    <PortfolioItem 
-                        key={order._id || idx} 
-                        data={order} 
-                        onClick={setSelectedOrder} 
-                    />
-                ))}
-
-                {!loader && filteredOrders.length === 0 && (
-                    <div className="text-[var(--text-secondary)] bg-fuchsia-900/10 border border-fuchsia-900/30 rounded-lg p-6 text-sm text-center flex flex-col items-center">
-                        <Filter className="w-8 h-8 mb-2 opacity-50" />
-                        <p>No orders found.</p>
-                        {allOrders.length > 0 && <p className="text-xs opacity-60 mt-1">Try adjusting your filters.</p>}
-                    </div>
-                )}
+              <div className="flex justify-between items-center pt-3 border-t border-[var(--border-color)]">
+                <p className="text-[var(--text-secondary)] text-sm">Total Realized P&L</p>
+                <p className={`text-lg font-bold ${totalColor}`}>
+                  {signSym(summary.totalPnl)}
+                  {Number(summary.totalPnl).toFixed(2)}
+                </p>
+              </div>
             </div>
+          )}
+        </div>
 
-            {/* Helper Window - Uncomment when needed */}
-            {/* {selectedOrder && (
+        {/* List Header */}
+        <h3 className="text-base font-semibold mb-3 flex items-center justify-between">
+          <span>Closed Positions ({filteredOrders.length})</span>
+          {/* Show indicator if filtered */}
+          {allOrders.length !== filteredOrders.length && (
+            <span className="text-[10px] bg-indigo-500/20 text-indigo-400 px-2 py-0.5 rounded-full">Filtered</span>
+          )}
+        </h3>
+
+        {/* The List */}
+        {loader && <div className="text-center text-[var(--text-secondary)] text-sm mt-10">Loading positions...</div>}
+
+        {!loader && filteredOrders.map((order, idx) => (
+          <PortfolioItem
+            key={order._id || idx}
+            data={order}
+            onClick={setSelectedOrder}
+          />
+        ))}
+
+        {!loader && filteredOrders.length === 0 && (
+          <div className="text-[var(--text-secondary)] bg-fuchsia-900/10 border border-fuchsia-900/30 rounded-lg p-6 text-sm text-center flex flex-col items-center">
+            <Filter className="w-8 h-8 mb-2 opacity-50" />
+            <p>No orders found.</p>
+            {allOrders.length > 0 && <p className="text-xs opacity-60 mt-1">Try adjusting your filters.</p>}
+          </div>
+        )}
+      </div>
+
+      {/* Helper Window - Uncomment when needed */}
+      {/* {selectedOrder && (
                 <ClosedOrderBottomWindow 
                     selectedOrder={selectedOrder} 
                     onClose={() => setSelectedOrder(null)} 
                 />
             )} */}
-        </div>
-    );
+    </div>
+  );
 }

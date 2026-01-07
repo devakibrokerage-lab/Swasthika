@@ -29,7 +29,7 @@ export const updateDhanAccessToken = async (clientId, newToken) => {
 
     if (!credentials) {
       console.error(`❌ No DhanCredential found for clientId: ${clientId}. Cannot update token.`);
-      console.error('   Run initialization script first: node scripts/init-dhan-credentials.js');
+      console.error(' Run initialization script first: node scripts/init-dhan-credentials.js');
       return null;
     }
 
